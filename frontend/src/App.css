@@ -1,0 +1,126 @@
+/* ===============================
+   FONTE GLOBAL
+   =============================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #F5F7FA; /* cinza gelo */
+    color: #1F2937;
+}
+
+/* ===============================
+   CONTAINER
+   =============================== */
+.mantine-Container-root {
+    background-color: transparent;
+}
+
+/* ===============================
+   CARDS
+   =============================== */
+.mantine-Card-root {
+    background-color: #FFFFFF;
+    border: 1px solid #E6EAF0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* ===============================
+   TÍTULOS
+   =============================== */
+h1, h2, h3, h4 {
+    color: #111827;
+    font-weight: 600;
+}
+
+/* ===============================
+   TEXTOS
+   =============================== */
+.mantine-Text-root {
+    color: #1F2937;
+}
+
+.mantine-Text-root[data-dimmed] {
+    color: #6B7280;
+}
+
+/* ===============================
+   INPUTS & SELECTS
+   =============================== */
+.mantine-Input-input,
+.mantine-Select-input {
+    border-radius: 8px;
+    border: 1px solid #E6EAF0;
+}
+
+.mantine-Input-input:focus,
+.mantine-Select-input:focus {
+    border-color: #2563EB;
+}
+
+/* ===============================
+   BOTÕES
+   =============================== */
+.mantine-Button-root {
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.mantine-Button-root[data-variant='filled'] {
+    background-color: #2563EB;
+}
+
+.mantine-Button-root[data-variant='default'] {
+    background-color: #FFFFFF;
+    border: 1px solid #E6EAF0;
+}
+
+/* ===============================
+   BADGES
+   =============================== */
+.mantine-Badge-root {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* ===============================
+   TABELA
+   =============================== */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+thead th {
+    text-align: left;
+    font-size: 14px;
+    color: #6B7280;
+    border-bottom: 1px solid #E6EAF0;
+    padding: 12px;
+}
+
+tbody td {
+    padding: 12px;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 14px;
+}
+
+tbody tr:hover {
+    background-color: #F9FAFB;
+}
+
+/* ===============================
+   RESPONSIVO
+   =============================== */
+@media (max-width: 768px) {
+    .mantine-Grid-col {
+        width: 100% !important;
+    }
+}

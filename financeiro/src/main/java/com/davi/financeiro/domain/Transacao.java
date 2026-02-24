@@ -28,6 +28,14 @@ public class Transacao {
     @NotNull(message = "O tipo de transação é  obrigatória")
     private TipoTransacao tipo;
 
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
+
+    public Usuario getUsuario() { return usuario; }
+    public void setUsuario(Usuario usuario) { this.usuario = usuario; }
+
     private String categoria;
 
     private LocalDate data;

@@ -1,65 +1,107 @@
-import React from 'react';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Doughnut } from 'react-chartjs-2';
+import { Text, Stack, useMantineColorScheme, Center } from '@mantine/core';
+import { IconMoodEmpty } from '@tabler/icons-react';
 
-const GraficoPizza = ({ receitas, despesas }) => {
-    const dados = [
-        { name: 'Receitas', value: receitas },
-        { name: 'Despesas', value: despesas },
-    ];
+ChartJS.register(ArcElement, Tooltip, Legend);
 
-    const CORES = ['#28a745', '#dc3545'];
+// --- CORES DO GRÁFICO (Paleta estendida para as 25 categorias) ---
+const coresCategorias = {
+    'Renda': '#40C057',
+    'Pendente de categoria': '#ADB5BD',
+    'Comida e bebida': '#FF6B6B',
+    'Contas e serviços': '#F06595',
+    'Transporte': '#339AF0',
+    'Compras': '#CC5DE8',
+    'Supermercado': '#51CF66',
+    'Empréstimos': '#FF922B',
+    'Saúde e cuidados pessoais': '#20C997',
+    'Taxas': '#845EF7',
+    'Viagens': '#5C7CFA',
+    'Serviços profissionais': '#868E96',
+    'Educação': '#22B8CF',
+    'Roupas': '#FAA2C1',
+    'Assinaturas digitais': '#4DABF7',
+    'Entretenimento': '#FCC419',
+    'Eletrônicos': '#15AABF',
+    'Esportes': '#FD7E14',
+    'Amizades e família': '#E03131',
+    'Animais de estimação': '#94D82D',
+    'Casa': '#F59F00',
+    'Doações': '#0CA678',
+    'Impostos': '#C92A2A',
+    'Investimentos': '#2F9E44',
+    'Jogos de azar': '#6741D9',
+    'Outros': '#495057'
+};
 
-    // Função para desenhar a % dentro da fatia
-    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-        const RADIAN = Math.PI / 180;
-        // Calcula a posição exata (raio) para colocar o texto no meio da fatia
-        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-        const x = cx + radius * Math.cos(-midAngle * RADIAN);
-        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+function GraficoPizza({ labels, valores }) {
+    const { colorScheme } = useMantineColorScheme();
+    const isDark = colorScheme === 'dark';
 
-        // Só mostra se for maior que 0% para não poluir
-        if (percent === 0) return null;
-
+    if (!valores || valores.length === 0) {
         return (
-            <text
-                x={x}
-                y={y}
-                fill="white"
-                textAnchor="middle"
-                dominantBaseline="central"
-                style={{ fontWeight: 'bold', fontSize: '14px' }}
-            >
-                {`${(percent * 100).toFixed(0)}%`}
-            </text>
+            <Center h="100%" w="100%">
+                <Stack align="center" gap="xs">
+                    <IconMoodEmpty size={40} color="gray" opacity={0.5} />
+                    <Text c="dimmed" size="sm">Nenhuma despesa para exibir</Text>
+                </Stack>
+            </Center>
         );
+    }
+
+    const backgroundColors = labels.map(label => coresCategorias[label] || '#868E96');
+
+    const data = {
+        labels: labels,
+        datasets: [
+            {
+                data: valores,
+                backgroundColor: backgroundColors,
+                borderColor: isDark ? '#1A1B1E' : '#FFFFFF',
+                borderWidth: 2,
+            },
+        ],
+    };
+
+    const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    color: isDark ? '#C1C2C5' : '#1A1B1E',
+                    font: { family: "'Inter', sans-serif", size: 12 },
+                    usePointStyle: true,
+                    boxWidth: 8
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        let label = context.label || '';
+                        if (label) label += ': ';
+                        if (context.parsed !== null) {
+                            label += new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(context.parsed);
+                        }
+                        return label;
+                    }
+                }
+            }
+        }
     };
 
     return (
-        <div style={{ width: '100%', height: 300, background: 'white', borderRadius: '10px', padding: '10px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ textAlign: 'center', margin: '0 0 10px 0' }}>Receitas vs Despesas</h3>
-            <ResponsiveContainer width="100%" height="90%">
-                <PieChart>
-                    <Pie
-                        data={dados}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={80}
-                        paddingAngle={5}
-                        dataKey="value"
-                        label={renderCustomizedLabel} // <--- AQUI ESTÁ A MÁGICA
-                        labelLine={false} // Tira a linhazinha puxando pra fora
-                    >
-                        {dados.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={CORES[index]} />
-                        ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `R$ ${value.toFixed(2)}`} />
-                    <Legend verticalAlign="bottom" height={36}/>
-                </PieChart>
-            </ResponsiveContainer>
-        </div>
+        <Stack align="center" justify="center" h="100%" w="100%">
+            <Text size="md" fw={700} c={isDark ? 'white' : 'dark'} mb="sm">
+                Despesas por Categoria
+            </Text>
+            <div style={{ position: 'relative', height: '200px', width: '100%' }}>
+                <Doughnut data={data} options={options} />
+            </div>
+        </Stack>
     );
-};
+}
 
 export default GraficoPizza;

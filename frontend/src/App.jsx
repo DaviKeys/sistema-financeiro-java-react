@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Container, Grid, Card, Text, Group, Button, TextInput, Select, MultiSelect, Table, Title, ActionIcon, Center, Stack, ThemeIcon, Tooltip, Box } from '@mantine/core';
+import { Container, Grid, Card, Text, Group, Button, Select, MultiSelect, Title, ActionIcon, Box, Stack, ThemeIcon, Tooltip } from '@mantine/core';
 import {
-    IconTrash, IconPencil, IconPlus, IconWallet, IconArrowUpRight, IconArrowDownRight, IconMoodEmpty, IconFilter,
-    IconTrendingUp, IconList, IconToolsKitchen2, IconReceipt, IconCar, IconShoppingBag, IconBasket,
+    IconTrash, IconFilter, IconTrendingUp, IconList, IconToolsKitchen2, IconReceipt, IconCar, IconShoppingBag, IconBasket,
     IconBuildingBank, IconFirstAidKit, IconReceiptTax, IconPlane, IconBriefcase, IconSchool,
     IconHanger, IconDeviceTv, IconTicket, IconDeviceDesktop, IconBallFootball, IconUsers,
     IconPaw, IconHome, IconHeartHandshake, IconFileDescription, IconChartLine, IconDice5, IconDots,
@@ -10,13 +9,15 @@ import {
 } from '@tabler/icons-react';
 
 import { notifications } from '@mantine/notifications';
-
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 import GraficoPizza from './GraficoPizza';
 import ThemeToggle from './ThemeToggle';
 import Login from './Login';
+import ResumoCards from './ResumoCards';
+import FormularioTransacao from './FormularioTransacao';
+import TabelaTransacoes from './TabelaTransacoes';
 
 function App() {
     const authSalva = localStorage.getItem('isAutenticado') === 'true';
@@ -30,7 +31,6 @@ function App() {
     const [token, setToken] = useState(tokenSalvo);
 
     const [transacoes, setTransacoes] = useState([]);
-
     const [mesFiltro, setMesFiltro] = useState(null);
     const [anoFiltro, setAnoFiltro] = useState(null);
     const [categoriasFiltro, setCategoriasFiltro] = useState([]);
@@ -41,8 +41,6 @@ function App() {
     const [categoria, setCategoria] = useState(null);
     const [data, setData] = useState('');
     const [idEditando, setIdEditando] = useState(null);
-
-    // 🔥 CHAVE DE RESET PARA FORÇAR A TELA A LIMPAR AS CAIXINHAS
     const [chaveReset, setChaveReset] = useState(0);
 
     const hoje = new Date();
@@ -112,7 +110,7 @@ function App() {
                 setTransacoes([]);
             }
         } catch (erro) {
-            console.error("Erro:", erro);
+            console.error("Erro na busca de dados:", erro);
             setTransacoes([]);
         }
     };
@@ -125,7 +123,6 @@ function App() {
 
         const matchMes = parseInt(mes) === parseInt(mesFiltro);
         const matchAno = parseInt(ano) === parseInt(anoFiltro);
-
         const matchCategoria =
             categoriasFiltro.length === 0 ||
             categoriasFiltro.includes('Todas as categorias') ||
@@ -159,7 +156,6 @@ function App() {
         }
 
         const doc = new jsPDF();
-
         doc.setFontSize(20);
         doc.setTextColor(40, 40, 40);
         doc.text("Relatório Financeiro", 14, 22);
@@ -195,11 +191,7 @@ function App() {
             didParseCell: function (data) {
                 if (data.section === 'body' && data.column.index === 4) {
                     const tipo = transacoesFiltradas[data.row.index].tipo;
-                    if (tipo === 'RECEITA') {
-                        data.cell.styles.textColor = [43, 138, 62];
-                    } else {
-                        data.cell.styles.textColor = [224, 49, 49];
-                    }
+                    data.cell.styles.textColor = tipo === 'RECEITA' ? [43, 138, 62] : [224, 49, 49];
                 }
             }
         });
@@ -260,7 +252,7 @@ function App() {
             if (!response.ok) {
                 const erroBackend = await response.text();
                 return notifications.show({
-                    title: 'Erro do Servidor',
+                    title: 'Erro',
                     message: erroBackend,
                     color: 'red',
                     icon: <IconX size={18} />
@@ -272,8 +264,8 @@ function App() {
             setAnoFiltro(anoAdd);
 
             notifications.show({
-                title: 'Sucesso!',
-                message: idEditando ? 'Transação atualizada com sucesso.' : 'Transação salva com sucesso.',
+                title: 'Sucesso',
+                message: idEditando ? 'Transação atualizada.' : 'Transação salva.',
                 color: 'green',
                 icon: <IconCheck size={18} />
             });
@@ -285,7 +277,7 @@ function App() {
             console.error(erro);
             notifications.show({
                 title: 'Erro de conexão',
-                message: 'Verifique se o servidor Java está rodando.',
+                message: 'Verifique a disponibilidade do servidor.',
                 color: 'red',
                 icon: <IconX size={18} />
             });
@@ -304,7 +296,7 @@ function App() {
 
             notifications.show({
                 title: 'Excluído',
-                message: 'A transação foi removida.',
+                message: 'Transação removida com sucesso.',
                 color: 'orange',
                 icon: <IconTrash size={18} />
             });
@@ -317,7 +309,7 @@ function App() {
 
     const limparFormulario = () => {
         setDescricao(''); setValor(''); setCategoria(null); setData(''); setTipo(null); setIdEditando(null);
-        setChaveReset(valorAtual => valorAtual + 1); // 🔥 GIRA A CHAVE PARA RECRIAR O VISUAL DOS SELECTS
+        setChaveReset(valorAtual => valorAtual + 1);
     };
 
     const limparFiltros = () => {
@@ -464,35 +456,12 @@ function App() {
                     </Group>
                 </Group>
 
-                <Grid mb="xl">
-                    <Grid.Col span={{ base: 12, md: 4 }}>
-                        <Card padding="lg" radius="md" shadow="sm" withBorder>
-                            <Group justify="space-between" mb="xs">
-                                <Text size="xs" c="dimmed" fw={700} tt="uppercase">Saldo Atual</Text>
-                                <IconWallet size={20} color="gray" />
-                            </Group>
-                            <Text fw={700} size="xl" c="blue">{formatarBRL(saldo)}</Text>
-                        </Card>
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-                        <Card padding="lg" radius="md" shadow="sm" withBorder>
-                            <Group justify="space-between" mb="xs">
-                                <Text size="xs" c="dimmed" fw={700} tt="uppercase">Receitas</Text>
-                                <IconArrowUpRight size={20} color="green" />
-                            </Group>
-                            <Text fw={700} size="xl" c="green">{formatarBRL(totalReceitas)}</Text>
-                        </Card>
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, sm: 6, md: 4 }}>
-                        <Card padding="lg" radius="md" shadow="sm" withBorder>
-                            <Group justify="space-between" mb="xs">
-                                <Text size="xs" c="dimmed" fw={700} tt="uppercase">Despesas</Text>
-                                <IconArrowDownRight size={20} color="red" />
-                            </Group>
-                            <Text fw={700} size="xl" c="red">{formatarBRL(totalDespesas)}</Text>
-                        </Card>
-                    </Grid.Col>
-                </Grid>
+                <ResumoCards
+                    saldo={saldo}
+                    totalReceitas={totalReceitas}
+                    totalDespesas={totalDespesas}
+                    formatarBRL={formatarBRL}
+                />
 
                 <Grid mb="xl">
                     <Grid.Col span={{ base: 12, md: 5 }}>
@@ -502,126 +471,32 @@ function App() {
                     </Grid.Col>
 
                     <Grid.Col span={{ base: 12, md: 7 }}>
-                        <Card padding="lg" radius="md" shadow="sm" withBorder>
-                            <Group justify="space-between" mb="md">
-                                <Text fw={600}>{idEditando ? 'Editar Transação' : 'Nova Transação'}</Text>
-                            </Group>
-
-                            <Grid>
-                                <Grid.Col span={{ base: 12, sm: 8 }}>
-                                    <TextInput label="Descrição" placeholder="Ex: Aluguel" value={descricao} onChange={(e) => setDescricao(e.currentTarget.value)} />
-                                </Grid.Col>
-
-                                <Grid.Col span={{ base: 12, sm: 4 }}>
-                                    <Select
-                                        key={`tipo-${chaveReset}`} // 🔥 CHAVE CONECTADA AQUI
-                                        label="Tipo"
-                                        placeholder="Selecione..."
-                                        data={['RECEITA', 'DESPESA']}
-                                        value={tipo}
-                                        onChange={setTipo}
-                                    />
-                                </Grid.Col>
-
-                                <Grid.Col span={{ base: 12, sm: 4 }}>
-                                    <TextInput label="Valor" placeholder="0,00" value={valor} onChange={(e) => setValor(e.currentTarget.value)} />
-                                </Grid.Col>
-                                <Grid.Col span={{ base: 12, sm: 4 }}>
-                                    <TextInput label="Data" type="date" value={data} onChange={(e) => setData(e.currentTarget.value)} />
-                                </Grid.Col>
-                                <Grid.Col span={{ base: 12, sm: 4 }}>
-                                    <Select
-                                        key={`cat-${chaveReset}`} // 🔥 CHAVE CONECTADA AQUI
-                                        label="Categoria"
-                                        placeholder="Selecione..."
-                                        data={listaCategorias}
-                                        value={categoria}
-                                        onChange={setCategoria}
-                                        searchable
-                                        nothingFoundMessage="Nada encontrado..."
-                                        renderOption={renderizarOpcaoCategoria}
-                                    />
-                                </Grid.Col>
-
-                                <Grid.Col span={12}>
-                                    <Group justify="flex-end" mt="xs">
-                                        {idEditando && <Button variant="subtle" color="gray" onClick={limparFormulario} fullWidth={{ base: true, sm: false }}>Cancelar</Button>}
-                                        <Button onClick={salvarTransacao} color={idEditando ? 'orange' : 'blue'} leftSection={idEditando ? <IconPencil size={16}/> : <IconPlus size={16} />} fullWidth={{ base: true, sm: false }}>
-                                            {idEditando ? 'Atualizar' : 'Adicionar'}
-                                        </Button>
-                                    </Group>
-                                </Grid.Col>
-                            </Grid>
-                        </Card>
+                        <FormularioTransacao
+                            descricao={descricao} setDescricao={setDescricao}
+                            tipo={tipo} setTipo={setTipo}
+                            valor={valor} setValor={setValor}
+                            data={data} setData={setData}
+                            categoria={categoria} setCategoria={setCategoria}
+                            idEditando={idEditando}
+                            chaveReset={chaveReset}
+                            listaCategorias={listaCategorias}
+                            renderizarOpcaoCategoria={renderizarOpcaoCategoria}
+                            salvarTransacao={salvarTransacao}
+                            limparFormulario={limparFormulario}
+                        />
                     </Grid.Col>
                 </Grid>
 
-                <Card padding="lg" radius="md" shadow="sm" withBorder>
-                    <Title order={4} mb="md">Histórico de Transações</Title>
-
-                    {transacoesFiltradas.length === 0 ? (
-                        <Center py="xl">
-                            <Stack align="center" gap="xs">
-                                <IconMoodEmpty size={48} color="gray" opacity={0.5} />
-                                <Text c="dimmed" ta="center">
-                                    {(!mesFiltro || !anoFiltro)
-                                        ? "Selecione um mês e ano nos filtros acima para visualizar suas finanças."
-                                        : "Nenhuma transação encontrada para este filtro."}
-                                </Text>
-                            </Stack>
-                        </Center>
-                    ) : (
-                        <Box style={{ overflowX: 'auto' }}>
-                            <Table striped highlightOnHover verticalSpacing="sm" style={{ minWidth: 600 }}>
-                                <Table.Thead>
-                                    <Table.Tr>
-                                        <Table.Th>Descrição</Table.Th>
-                                        <Table.Th>Categoria</Table.Th>
-                                        <Table.Th>Data</Table.Th>
-                                        <Table.Th style={{ textAlign: 'right' }}>Valor</Table.Th>
-                                        <Table.Th style={{ textAlign: 'center' }}>Ações</Table.Th>
-                                    </Table.Tr>
-                                </Table.Thead>
-                                <Table.Tbody>
-                                    {transacoesFiltradas.map((t) => {
-                                        const Icone = iconePorCategoria[t.categoria] || IconDots;
-                                        const cor = corBadgeCategoria[t.categoria] || 'gray';
-
-                                        return (
-                                            <Table.Tr key={t.id}>
-                                                <Table.Td fw={500}>{t.descricao}</Table.Td>
-
-                                                <Table.Td>
-                                                    <Group gap="sm" wrap="nowrap">
-                                                        <ThemeIcon color={cor} variant="filled" radius="xl" size="md" style={{ flexShrink: 0 }}>
-                                                            <Icone size={16} />
-                                                        </ThemeIcon>
-                                                        <Text size="sm" fw={500}>{t.categoria}</Text>
-                                                    </Group>
-                                                </Table.Td>
-
-                                                <Table.Td>{new Date(t.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</Table.Td>
-                                                <Table.Td style={{ color: t.tipo === 'DESPESA' ? '#fa5252' : '#40c057', fontWeight: 'bold', textAlign: 'right', whiteSpace: 'nowrap' }}>
-                                                    {t.tipo === 'DESPESA' ? '- ' : '+ '}{formatarBRL(t.valor)}
-                                                </Table.Td>
-                                                <Table.Td>
-                                                    <Group gap={4} justify="center" wrap="nowrap">
-                                                        <ActionIcon variant="subtle" color="blue" onClick={() => editarTransacao(t)}>
-                                                            <IconPencil size={16} />
-                                                        </ActionIcon>
-                                                        <ActionIcon variant="subtle" color="red" onClick={() => removerTransacao(t.id)}>
-                                                            <IconTrash size={16} />
-                                                        </ActionIcon>
-                                                    </Group>
-                                                </Table.Td>
-                                            </Table.Tr>
-                                        );
-                                    })}
-                                </Table.Tbody>
-                            </Table>
-                        </Box>
-                    )}
-                </Card>
+                <TabelaTransacoes
+                    transacoesFiltradas={transacoesFiltradas}
+                    mesFiltro={mesFiltro}
+                    anoFiltro={anoFiltro}
+                    iconePorCategoria={iconePorCategoria}
+                    corBadgeCategoria={corBadgeCategoria}
+                    formatarBRL={formatarBRL}
+                    editarTransacao={editarTransacao}
+                    removerTransacao={removerTransacao}
+                />
             </Container>
         </>
     );

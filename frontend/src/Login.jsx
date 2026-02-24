@@ -19,7 +19,7 @@ function Login({ onLogin }) {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8080/auth/login', {
+            const response = await fetch('https://api-financeiro-davi.onrender.com/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, senha }),
@@ -50,7 +50,7 @@ function Login({ onLogin }) {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8080/auth/cadastro', {
+            const response = await fetch('https://api-financeiro-davi.onrender.com/auth/registrar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nome, email, senha }),
@@ -74,12 +74,12 @@ function Login({ onLogin }) {
         }
     };
 
-    // 🔥 NOVA FUNÇÃO: Enviar o código para o Java
+     //Enviar o código para o Java
     const handleVerificacao = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch('http://localhost:8080/auth/verificar', {
+            const response = await fetch('https://api-financeiro-davi.onrender.com/auth/verificar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, codigo }),

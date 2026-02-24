@@ -97,7 +97,7 @@ function App() {
         if (!idUsuarioLogado || idUsuarioLogado === 'undefined') return;
 
         try {
-            const resp = await fetch(`http://localhost:8080/transacoes/usuario/${idUsuarioLogado}`, {
+            const resp = await fetch(`https://api-financeiro-davi.onrender.com/transacoes/usuario/${idUsuarioLogado}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -237,7 +237,7 @@ function App() {
         };
 
         const method = idEditando ? 'PUT' : 'POST';
-        const url = idEditando ? `http://localhost:8080/transacoes/${idEditando}` : `http://localhost:8080/transacoes/usuario/${idUsuarioLogado}`;
+        const url = idEditando ? `https://api-financeiro-davi.onrender.com/transacoes/${idEditando}` : `https://api-financeiro-davi.onrender.com/transacoes/usuario/${idUsuarioLogado}`;
 
         try {
             const response = await fetch(url, {
@@ -286,7 +286,7 @@ function App() {
 
     const removerTransacao = async (id) => {
         if (confirm("Tem certeza que deseja excluir esta transação?")) {
-            await fetch(`http://localhost:8080/transacoes/${id}`, {
+            await fetch(`https://api-financeiro-davi.onrender.com/transacoes/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`

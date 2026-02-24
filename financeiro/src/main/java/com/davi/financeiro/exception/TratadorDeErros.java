@@ -24,7 +24,9 @@ public class TratadorDeErros {
     // 2. Captura erros gerais e inesperados do servidor (Erro 500)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErroResposta> tratarErroGenerico(Exception ex) {
+        ex.printStackTrace();
         ErroResposta erro = new ErroResposta(
+
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Ocorreu um erro interno no servidor. Contate o suporte.",
                 LocalDateTime.now()

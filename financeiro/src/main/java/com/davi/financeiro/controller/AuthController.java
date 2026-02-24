@@ -50,7 +50,7 @@ public class AuthController {
         return ResponseEntity.status(401).body("E-mail ou senha incorretos.");
     }
 
-    @PostMapping("/cadastro")
+    @PostMapping("/registrar")
     public ResponseEntity<?> cadastrar(@RequestBody CadastroRequestDTO data) {
         if (repository.findByEmail(data.email()).isPresent()) {
             return ResponseEntity.badRequest().body("E-mail já cadastrado.");

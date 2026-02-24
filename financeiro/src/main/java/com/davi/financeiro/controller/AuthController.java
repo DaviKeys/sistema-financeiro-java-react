@@ -4,6 +4,8 @@ import com.davi.financeiro.domain.Usuario;
 import com.davi.financeiro.repository.UsuarioRepository;
 import com.davi.financeiro.service.EmailService;
 import com.davi.financeiro.service.TokenService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +18,8 @@ import java.util.Random;
 @RequestMapping("/auth")
 @CrossOrigin(origins = "*")
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired
     private UsuarioRepository repository;
@@ -72,6 +76,7 @@ public class AuthController {
         try {
             emailService.enviarEmailVerificacao(novoUsuario.getEmail(), novoUsuario.getNome(), codigoGerado);
         } catch (Exception e) {
+            log.error("Erro ao enviar e-mail de verificação para {} (usuarioId={})", novoUsuario.getEmail(), novoUsuario.getId(), e);
             return ResponseEntity.status(500).body("Usuário salvo, mas ocorreu um erro ao enviar o e-mail de confirmação. Tente um e-mail válido.");
         }
 

@@ -77,7 +77,12 @@ public class AuthController {
             emailService.enviarEmailVerificacao(novoUsuario.getEmail(), novoUsuario.getNome(), codigoGerado);
         } catch (Exception e) {
             log.error("Erro ao enviar e-mail de verificação para {} (usuarioId={})", novoUsuario.getEmail(), novoUsuario.getId(), e);
-            return ResponseEntity.status(500).body("Usuário salvo, mas ocorreu um erro ao enviar o e-mail de confirmação. Tente um e-mail válido.");
+            String mensagem = "Usuário salvo, mas ocorreu um erro ao enviar o e-mail de confirmação.";
+            String detalhe = e.getMessage();
+            if (detalhe != null && detalhe.toLowerCase().contains("can only send testing emails")) {
+                mensagem = mensagem + " Sua conta no Resend está em modo de testes e só pode enviar para e-mails autorizados. Cadastre/autorize o destinatário no Resend ou verifique um domínio.";
+            }
+            return ResponseEntity.status(500).body(mensagem);
         }
 
         return ResponseEntity.ok("Usuário cadastrado! Verifique seu e-mail para ativar a conta.");

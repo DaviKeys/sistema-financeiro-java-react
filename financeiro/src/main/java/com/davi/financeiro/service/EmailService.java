@@ -1,46 +1,72 @@
 package com.davi.financeiro.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestClient;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Service
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Value("${resend.api-key}")
+    private String resendApiKey;
 
-    @Value("${spring.mail.username}")
+    @Value("${mail.from}")
     private String remetente;
 
+    private final RestClient restClient;
+
+    public EmailService(RestClient.Builder restClientBuilder) {
+        this.restClient = restClientBuilder
+                .baseUrl("https://api.resend.com")
+                .build();
+    }
+
     public void enviarEmailVerificacao(String destinatario, String nome, String codigo) {
-        SimpleMailMessage mensagem = new SimpleMailMessage();
-
-        mensagem.setFrom(remetente);
-        mensagem.setTo(destinatario);
-        mensagem.setSubject("Confirme sua conta - Gestão Financeira");
-
-        mensagem.setText("Olá, " + nome + "!\n\n" +
+        String assunto = "Confirme sua conta - Gestão Financeira";
+        String corpo = "Olá, " + nome + "!\n\n" +
                 "Bem-vindo(a) ao nosso sistema de Gestão Financeira.\n" +
                 "Para ativar sua conta e liberar o seu acesso, digite o código de verificação abaixo na tela do sistema:\n\n" +
                 "Código de Verificação: " + codigo + "\n\n" +
-                "Se você não solicitou este cadastro, apenas ignore este e-mail.");
+                "Se você não solicitou este cadastro, apenas ignore este e-mail.";
+
+        Map<String, Object> payload = Map.of(
+                "from", remetente,
+                "to", new String[]{destinatario},
+                "subject", assunto,
+                "text", corpo
+        );
 
         try {
-            mailSender.send(mensagem);
-            log.info("E-mail de verificação enviado para {}", destinatario);
-        } catch (MailException e) {
-            log.error("Falha ao enviar e-mail via JavaMailSender (destinatario={}, remetente={})", destinatario, remetente, e);
-            throw e;
+            Map response = restClient
+                    .post()
+                    .uri("/emails")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + resendApiKey)
+                    .body(payload)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> {
+                        String body;
+                        try {
+                            body = res.getBody() != null ? new String(res.getBody().readAllBytes()) : "";
+                        } catch (Exception e) {
+                            body = "<falha ao ler body>";
+                        }
+                        throw new IllegalStateException("Resend retornou status=" + res.getStatusCode() + " body=" + body);
+                    })
+                    .body(Map.class);
+
+            Object id = response != null ? response.get("id") : null;
+            log.info("E-mail de verificação enviado via Resend para {} (id={})", destinatario, id);
         } catch (RuntimeException e) {
-            log.error("Erro inesperado ao enviar e-mail (destinatario={}, remetente={})", destinatario, remetente, e);
+            log.error("Falha ao enviar e-mail via Resend (destinatario={}, remetente={})", destinatario, remetente, e);
             throw e;
         }
     }

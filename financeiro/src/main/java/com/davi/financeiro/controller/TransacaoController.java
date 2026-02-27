@@ -24,26 +24,20 @@ public class TransacaoController {
     @Autowired
     private TransacaoRepository transacaoRepository;
 
-    // --- NOVAS ROTAS COM SUPORTE A MÚLTIPLOS USUÁRIOS ---
-
-    // 1. Rota para listar recebe o ID na URL
     @GetMapping("/usuario/{usuarioId}")
     public ResponseEntity<List<Transacao>> listarPorUsuario(@PathVariable Long usuarioId) {
         return ResponseEntity.ok(transacaoRepository.findByUsuarioId(usuarioId));
     }
 
-    // 2. Rota para salvar recebe o ID na URL e a transação no corpo
     @PostMapping("/usuario/{usuarioId}")
     public ResponseEntity<Transacao> salvarPorUsuario(@PathVariable Long usuarioId, @RequestBody Transacao transacao) {
-        // Cria um utilizador "vazio" apenas com o ID para fazer o vínculo
+        // Vincula a transação ao usuário sem precisar buscar o registro completo.
         Usuario usuarioVinculo = new Usuario();
         usuarioVinculo.setId(usuarioId);
         transacao.setUsuario(usuarioVinculo);
 
         return ResponseEntity.ok(transacaoRepository.save(transacao));
     }
-
-    // --- ROTAS ANTIGAS DE ATUALIZAR, DELETAR E RESUMO ---
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {

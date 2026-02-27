@@ -63,7 +63,6 @@ public class AuthController {
     }
 }
 
-// DTOs auxiliares
 record LoginRequestDTO(String email, String senha) {}
 record CadastroRequestDTO(String nome, String email, String senha) {}
 record LoginResponseDTO(String mensagem, String nome, Long id, String token) {}

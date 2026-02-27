@@ -105,7 +105,7 @@ function App() {
         'Jogos de azar': IconDice5, 'Outros': IconDots
     };
 
-    const listaAnos = ['2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+    const listaAnos = [ '2025', '2026', '2027', '2028', '2029', '2030'];
 
     const listaMeses = [
         { value: '1', label: 'Janeiro' },

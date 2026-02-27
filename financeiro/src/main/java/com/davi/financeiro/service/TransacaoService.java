@@ -11,32 +11,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Service //o crachá do serviço
+@Service
 public class TransacaoService {
 
-    @Autowired//2- a injeção de dependência
+    @Autowired
     private TransacaoRepository repository;
 
-    //Salvar
     public Transacao salvar(Transacao transacao){
         return repository.save(transacao);
     }
-    //Listar Tudo
+
     public List<Transacao> listarTodas (){
         return repository.findAll();
     }
 
-    //Deletar
     public void deletar(Long id){
         repository.deleteById(id);
     }
 
-    // Método para atualizar uma transação existente
     public Transacao atualizar(Long id, Transacao transacaoAtualizada) {
-        // 1. Busca a transação antiga no banco
         Transacao transacaoExistente = repository.findById(id).orElse(null);
 
-        // 2. Se ela existir, atualiza os campos
         if (transacaoExistente != null) {
             transacaoExistente.setDescricao(transacaoAtualizada.getDescricao());
             transacaoExistente.setValor(transacaoAtualizada.getValor());
@@ -44,7 +39,6 @@ public class TransacaoService {
             transacaoExistente.setCategoria(transacaoAtualizada.getCategoria());
             transacaoExistente.setData(transacaoAtualizada.getData());
 
-            // 3. Salva a versão atualizada no banco
             return repository.save(transacaoExistente);
         }
         return null;
@@ -67,7 +61,6 @@ public class TransacaoService {
 
         BigDecimal saldo = totalReceitas.subtract(totalDespesas);
 
-        //5- O pacote de resposta
         Map<String, Object> resumo = new HashMap<>();
         resumo.put("totalReceitas", totalReceitas);
         resumo.put("totalDespesas", totalDespesas);

@@ -5,7 +5,6 @@ import { IconMoodEmpty } from '@tabler/icons-react';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-// --- CORES DO GRÁFICO (Paleta estendida para as 25 categorias) ---
 const coresCategorias = {
     'Renda': '#40C057',
     'Pendente de categoria': '#ADB5BD',

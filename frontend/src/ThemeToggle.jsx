@@ -12,7 +12,6 @@ function ThemeToggle() {
             size="lg"
             aria-label="Alternar tema"
         >
-            {/* Se estiver Escuro (Lua) -> Mostra LUA. Se estiver Claro (Sol) -> Mostra SOL */}
             {computedColorScheme === 'dark' ? (
                 <IconMoon size={20} stroke={1.5} />
             ) : (

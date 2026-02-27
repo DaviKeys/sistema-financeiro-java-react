@@ -212,7 +212,14 @@ function App() {
         doc.setFontSize(11);
         doc.setTextColor(100, 100, 100);
         doc.text(`Usuário: ${usuarioLogado}`, 14, 30);
-        doc.text(`Período: Mês ${mesFiltro} de ${anoFiltro}`, 14, 36);
+
+        const anoPeriodo = anoFiltro || String(new Date().getFullYear());
+        const mesNome = listaMeses.find(m => m.value === String(mesFiltro))?.label;
+        const periodoTexto = mesFiltro && mesNome
+            ? `Período: ${mesNome} de ${anoPeriodo}`
+            : `Período: Todos os meses de ${anoPeriodo}`;
+
+        doc.text(periodoTexto, 14, 36);
         doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 42);
 
         doc.setFontSize(12);

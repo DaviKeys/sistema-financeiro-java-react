@@ -31,9 +31,26 @@ function App() {
     const [token, setToken] = useState(tokenSalvo);
 
     const [transacoes, setTransacoes] = useState([]);
-    const [mesFiltro, setMesFiltro] = useState(null);
-    const [anoFiltro, setAnoFiltro] = useState(null);
-    const [categoriasFiltro, setCategoriasFiltro] = useState([]);
+    const [mesFiltro, setMesFiltro] = useState(() => {
+        const salvo = sessionStorage.getItem('filtroMes');
+        if (salvo) return salvo;
+        return String(new Date().getMonth() + 1);
+    });
+    const [anoFiltro, setAnoFiltro] = useState(() => {
+        const salvo = sessionStorage.getItem('filtroAno');
+        if (salvo) return salvo;
+        return String(new Date().getFullYear());
+    });
+    const [categoriasFiltro, setCategoriasFiltro] = useState(() => {
+        const salvo = sessionStorage.getItem('filtroCategorias');
+        if (!salvo) return [];
+        try {
+            const parsed = JSON.parse(salvo);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    });
 
     const [descricao, setDescricao] = useState('');
     const [valor, setValor] = useState('');
@@ -85,6 +102,31 @@ function App() {
     };
 
     const listaAnos = ['2024', '2025', '2026', '2027', '2028', '2029', '2030'];
+
+    const listaMeses = [
+        { value: '1', label: 'Janeiro' },
+        { value: '2', label: 'Fevereiro' },
+        { value: '3', label: 'Março' },
+        { value: '4', label: 'Abril' },
+        { value: '5', label: 'Maio' },
+        { value: '6', label: 'Junho' },
+        { value: '7', label: 'Julho' },
+        { value: '8', label: 'Agosto' },
+        { value: '9', label: 'Setembro' },
+        { value: '10', label: 'Outubro' },
+        { value: '11', label: 'Novembro' },
+        { value: '12', label: 'Dezembro' },
+    ];
+
+    useEffect(() => {
+        if (mesFiltro) sessionStorage.setItem('filtroMes', mesFiltro);
+        else sessionStorage.removeItem('filtroMes');
+
+        if (anoFiltro) sessionStorage.setItem('filtroAno', anoFiltro);
+        else sessionStorage.removeItem('filtroAno');
+
+        sessionStorage.setItem('filtroCategorias', JSON.stringify(categoriasFiltro));
+    }, [mesFiltro, anoFiltro, categoriasFiltro]);
 
     useEffect(() => {
         if (idUsuarioLogado && token) {
@@ -451,7 +493,7 @@ function App() {
                             setMesFiltro(valor);
                             limparFormulario();
                         }}
-                        data={['1','2','3','4','5','6','7','8','9','10','11','12'].map(m => ({ value: m, label: `Mês ${m}` }))}
+                        data={listaMeses}
                         w={{ base: '100%', sm: 110 }}
                         clearable
                     />

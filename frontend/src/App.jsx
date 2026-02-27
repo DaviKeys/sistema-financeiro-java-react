@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Grid, Card, Text, Group, Button, Select, MultiSelect, Title, ActionIcon, Box, Stack, ThemeIcon, Tooltip } from '@mantine/core';
+import { Container, Grid, Card, Text, Group, Button, Select, MultiSelect, Title, ActionIcon, Box, Stack, ThemeIcon, Tooltip, Modal } from '@mantine/core';
 import {
     IconTrash, IconFilter, IconTrendingUp, IconList, IconToolsKitchen2, IconReceipt, IconCar, IconShoppingBag, IconBasket,
     IconBuildingBank, IconFirstAidKit, IconReceiptTax, IconPlane, IconBriefcase, IconSchool,
@@ -42,6 +42,9 @@ function App() {
     const [data, setData] = useState('');
     const [idEditando, setIdEditando] = useState(null);
     const [chaveReset, setChaveReset] = useState(0);
+
+    const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
+    const [idExcluir, setIdExcluir] = useState(null);
 
     const hoje = new Date();
     const dataFormatada = new Intl.DateTimeFormat('pt-BR', {
@@ -284,15 +287,23 @@ function App() {
         }
     };
 
-    const removerTransacao = async (id) => {
-        if (confirm("Tem certeza que deseja excluir esta transação?")) {
-            await fetch(`https://api-financeiro-davi.onrender.com/transacoes/${id}`, {
+    const removerTransacao = (id) => {
+        setIdExcluir(id);
+        setModalExcluirAberto(true);
+    };
+
+    const confirmarExclusao = async () => {
+        if (!idExcluir) return;
+
+        try {
+            await fetch(`https://api-financeiro-davi.onrender.com/transacoes/${idExcluir}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            carregarDados();
+
+            await carregarDados();
 
             notifications.show({
                 title: 'Excluído',
@@ -300,6 +311,17 @@ function App() {
                 color: 'orange',
                 icon: <IconTrash size={18} />
             });
+        } catch (erro) {
+            console.error(erro);
+            notifications.show({
+                title: 'Erro',
+                message: 'Não foi possível excluir a transação.',
+                color: 'red',
+                icon: <IconX size={18} />
+            });
+        } finally {
+            setModalExcluirAberto(false);
+            setIdExcluir(null);
         }
     };
 
@@ -365,6 +387,32 @@ function App() {
 
     return (
         <>
+            <Modal
+                opened={modalExcluirAberto}
+                onClose={() => {
+                    setModalExcluirAberto(false);
+                    setIdExcluir(null);
+                }}
+                title="Confirmar exclusão"
+                centered
+            >
+                <Text mb="md">Tem certeza que deseja excluir esta transação?</Text>
+                <Group justify="flex-end">
+                    <Button
+                        variant="default"
+                        onClick={() => {
+                            setModalExcluirAberto(false);
+                            setIdExcluir(null);
+                        }}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button color="red" onClick={confirmarExclusao}>
+                        Excluir
+                    </Button>
+                </Group>
+            </Modal>
+
             <Container fluid px="xl" pt="xl">
                 <Group justify="space-between" mb="md" align="flex-start" wrap="nowrap">
                     <Group gap="sm" align="center" wrap="nowrap">

@@ -64,7 +64,7 @@ function Login({ onLogin }) {
                     setIsLogin(true);
                 } else {
                     const dados = await loginResponse.json();
-                    onLogin(dados.nome, dados.id, dados.token);
+                    await onLogin(dados.nome, dados.id, dados.token);
                 }
             }
         } catch (error) {

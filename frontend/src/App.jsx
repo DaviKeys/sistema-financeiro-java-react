@@ -93,13 +93,13 @@ function App() {
         return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
     };
 
-    const carregarDados = async () => {
-        if (!idUsuarioLogado || idUsuarioLogado === 'undefined') return;
+    const carregarDados = async (id = idUsuarioLogado, tokenAtual = token) => {
+        if (!id || id === 'undefined') return;
 
         try {
-            const resp = await fetch(`https://api-financeiro-davi.onrender.com/transacoes/usuario/${idUsuarioLogado}`, {
+            const resp = await fetch(`https://api-financeiro-davi.onrender.com/transacoes/usuario/${id}`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${tokenAtual}`
                 }
             });
 
@@ -332,7 +332,7 @@ function App() {
     };
 
     if (!isAutenticado) {
-        return <Login onLogin={(nomeReal, idReal, tokenReal) => {
+        return <Login onLogin={async (nomeReal, idReal, tokenReal) => {
             setIsAutenticado(true);
             setUsuarioLogado(nomeReal);
             setIdUsuarioLogado(idReal);
@@ -342,6 +342,8 @@ function App() {
             localStorage.setItem('usuarioLogado', nomeReal);
             localStorage.setItem('idUsuarioLogado', idReal);
             localStorage.setItem('tokenJWT', tokenReal);
+
+            await carregarDados(idReal, tokenReal);
         }} />;
     }
 

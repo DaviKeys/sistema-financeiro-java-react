@@ -25,22 +25,26 @@ function App() {
     const idSalvo = localStorage.getItem('idUsuarioLogado') || null;
     const tokenSalvo = localStorage.getItem('tokenJWT') || '';
 
+    const obterMesInicial = () => {
+        const salvo = sessionStorage.getItem('filtroMes');
+        if (salvo) return salvo;
+        return String(new Date().getMonth() + 1);
+    };
+
+    const obterAnoInicial = () => {
+        const salvo = sessionStorage.getItem('filtroAno');
+        if (salvo) return salvo;
+        return String(new Date().getFullYear());
+    };
+
     const [isAutenticado, setIsAutenticado] = useState(authSalva);
     const [usuarioLogado, setUsuarioLogado] = useState(usuarioSalvo);
     const [idUsuarioLogado, setIdUsuarioLogado] = useState(idSalvo);
     const [token, setToken] = useState(tokenSalvo);
 
     const [transacoes, setTransacoes] = useState([]);
-    const [mesFiltro, setMesFiltro] = useState(() => {
-        const salvo = sessionStorage.getItem('filtroMes');
-        if (salvo) return salvo;
-        return String(new Date().getMonth() + 1);
-    });
-    const [anoFiltro, setAnoFiltro] = useState(() => {
-        const salvo = sessionStorage.getItem('filtroAno');
-        if (salvo) return salvo;
-        return String(new Date().getFullYear());
-    });
+    const [mesFiltro, setMesFiltro] = useState(() => obterMesInicial());
+    const [anoFiltro, setAnoFiltro] = useState(() => obterAnoInicial());
     const [categoriasFiltro, setCategoriasFiltro] = useState(() => {
         const salvo = sessionStorage.getItem('filtroCategorias');
         if (!salvo) return [];
@@ -402,6 +406,9 @@ function App() {
             setIdUsuarioLogado(idReal);
             setToken(tokenReal);
 
+            setMesFiltro(obterMesInicial());
+            setAnoFiltro(obterAnoInicial());
+
             localStorage.setItem('isAutenticado', 'true');
             localStorage.setItem('usuarioLogado', nomeReal);
             localStorage.setItem('idUsuarioLogado', idReal);
@@ -494,7 +501,8 @@ function App() {
                             limparFormulario();
                         }}
                         data={listaMeses}
-                        w={{ base: '100%', sm: 110 }}
+                        w={{ base: '100%', sm: 170 }}
+                        styles={{ input: { minWidth: 170 } }}
                         clearable
                     />
                     <Select
